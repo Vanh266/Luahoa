@@ -98,13 +98,10 @@ if box == 'Thông tin cơ bản':
     st.write('Lợi nhuận thuần(Q) : ', rev, 'vnđ')
 
 elif box == 'Chu trình kinh doanh':
-    if str(ck) in mck.iloc[:,0]:
-        for i in mck.columns[[1, 3, 4, 5, 6, 7]]:
+    for i in mck.columns[[1, 3, 4, 5, 6, 7]]:
             st.write(f'⁃ **{i}** : ')
             text = mck[i].iloc[0]  # Lấy giá trị từ hàng đầu tiên
             st.text(f'     {text}')
-    else:
-        st.write('Không có dữ liệu')
 
 elif box == 'Ban lãnh đạo':
     st.write(company.officers())
