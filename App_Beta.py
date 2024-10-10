@@ -18,8 +18,13 @@ def calculate_indicators(stock, ck):
     start = today - timedelta(days=30)
     
     # Tính khối lượng trung bình 15 ngày
-    val = stock.quote.history(start=str(start.date()), end=str(yesterday.date()))
-    vol_ave = val['volume'].iloc[7:]
+    val = stock.quote.history(symbol=ck,start=str(start.date()), end=str(yesterday.date()))
+    vol_ave = val['volume'].iloc[7:].mean()
+
+    # Tính biến động giá
+    current = stock.quote.intraday(symbol=ck, show_log=False).iloc[-1,1]
+    lag = stock.quote.history(symbol=ck,start=str(start.date()), end=str(yesterday.date())).iloc[-1,4]*1000
+    change = (current - lag)/(lag)*100
 
     # Tính RSI
     val['diff'] = val['close'].diff()
@@ -37,7 +42,7 @@ def calculate_indicators(stock, ck):
     # Lợi nhuận thuần
     rev = stock.finance.income_statement(period='quarter', lang='vi')['Lợi nhuận thuần'].iloc[0]
 
-    return vol_ave.mean(), rsi, roe, roa, rev
+    return vol_ave, current, change, rsi, roe, roa, rev
 
 # Tải logo và thông tin cố định
 st.image('logo.jpg', width=200)
@@ -60,7 +65,7 @@ st.info('Vui lòng nhấn enter sau khi nhập mã!')
 
 # Lấy dữ liệu từ API và tính toán
 stock, company = get_stock_data(ck)
-vol_ave, rsi, roe, roa, rev = calculate_indicators(stock, ck)
+vol_ave, current, change, rsi, roe, roa, rev = calculate_indicators(stock, ck)
 
 # Tra cứu từ Google Sheet
 ggs = pd.read_csv('Cau_truyen.csv')
@@ -69,14 +74,6 @@ danh_gia = ggs['Đánh giá'][ggs['Cổ Phiếu'] == ck]
 # Dữ liệu Google Sheet (tải một lần)
 ha = pd.read_csv('Ha.csv')
 ha = pd.DataFrame(ha)
-
-#Tính biến động giá
-today = datetime.today()
-yesterday = today - timedelta(days=1)
-start = today - timedelta(days=30)
-current = stock.quote.intraday(symbol=ck, show_log=False).iloc[-1,1]
-lag = stock.quote.history(start=str(start.date()), end=str(yesterday.date())).iloc[-1,4]*1000
-change = (current - lag)/(lag)*100
 
 # Hiển thị thông tin
 st.markdown(f'<span style="color:green; font-weight:bold;">{company.profile()["company_name"].iloc[0]}</span>', unsafe_allow_html=True)
