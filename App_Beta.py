@@ -69,7 +69,6 @@ danh_gia = ggs['Đánh giá'][ggs['Cổ Phiếu'] == ck]
 # Dữ liệu Google Sheet (tải một lần)
 ha = pd.read_csv('Ha.csv')
 ha = pd.DataFrame(ha)
-mck = ha[ha.iloc[:, 0] == ck]
 
 #Tính biến động giá
 today = datetime.today()
@@ -98,11 +97,15 @@ if box == 'Thông tin cơ bản':
     st.write('Lợi nhuận thuần(Q) : ', rev, 'vnđ')
 
 elif box == 'Chu trình kinh doanh':
-    for i in mck.columns[[1, 3, 4, 5, 6, 7]]:
+    if str(ck) in ha.iloc[:,0].values:
+        mck = ha[ha.iloc[:,0] == str(ck)]
+        for i in mck.columns[[1, 3, 4, 5, 6, 7]]:
             st.write(f'⁃ **{i}** : ')
             text = mck[i].iloc[0]  # Lấy giá trị từ hàng đầu tiên
             st.text(f'     {text}')
-
+    else:
+        st.write('Không có dữ liệu')
+    
 elif box == 'Ban lãnh đạo':
     st.write(company.officers())
 
